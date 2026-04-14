@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, FileText, MessageCircle, Plus, FileSignature } from 'lucide-react';
+import { ArrowLeft, FileText, MessageCircle, Plus, FileSignature, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,9 +28,12 @@ function Header({ onBack }: { onBack: () => void }) {
       >
         <ArrowLeft className="w-5 h-5 text-gray-700" />
       </button>
-      <h1 className="text-lg font-extrabold text-gray-900 tracking-tight w-full text-center">
-        Rental Agreements
-      </h1>
+      <div className="w-full text-center">
+        <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">
+          Rental Agreements
+        </h1>
+        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-0.5">Manage Contracts</p>
+      </div>
     </header>
   );
 }
@@ -107,6 +110,7 @@ function AgreementCard({ agreement }: { agreement: any }) {
 export default function AgreementsScreen() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Active');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const filteredAgreements = useMemo(() => {
     return MOCK_AGREEMENTS.filter(agr => agr.status === activeTab);
@@ -131,7 +135,10 @@ export default function AgreementsScreen() {
       <Header onBack={() => navigate(-1)} />
 
       {/* Floating Action Button */}
-      <button className="absolute bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-[0_8px_30px_rgb(37,99,235,0.4)] flex items-center justify-center active:scale-95 transition-transform z-30 hover:bg-blue-700">
+      <button 
+        onClick={() => setIsAddModalOpen(true)}
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-[0_8px_30px_rgb(37,99,235,0.4)] flex items-center justify-center active:scale-95 transition-transform z-30 hover:bg-blue-700"
+      >
         <Plus className="w-6 h-6" />
       </button>
 
@@ -175,6 +182,75 @@ export default function AgreementsScreen() {
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* Add Agreement Modal */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-gray-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center"
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-white w-full sm:w-[400px] rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl flex flex-col"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-extrabold text-gray-900">New Agreement</h2>
+                    <p className="text-xs font-medium text-gray-500 mt-0.5">Generate a rental contract</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsAddModalOpen(false)} className="p-2 bg-gray-50 rounded-full active:scale-95">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Select Tenant</label>
+                  <select className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none">
+                    <option value="">Select a tenant...</option>
+                    <option value="1">Rahul Verma (Room 101)</option>
+                    <option value="2">Amit Kumar (Room 102)</option>
+                  </select>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Start Date</label>
+                    <input type="date" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">End Date</label>
+                    <input type="date" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Monthly Rent (₹)</label>
+                  <input type="number" placeholder="e.g. 8500" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                
+                <button 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-[0_4px_20px_rgb(37,99,235,0.25)] transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Generate Agreement
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

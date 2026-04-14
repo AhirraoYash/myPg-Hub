@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Search, Filter, ChevronRight, User, Clock, AlertTriangle, IndianRupee } from 'lucide-react';
+import { ArrowLeft, Search, Filter, ChevronRight, User, Clock, AlertTriangle, IndianRupee, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 
@@ -31,9 +31,12 @@ function Header({ onBack }: { onBack: () => void }) {
       >
         <ArrowLeft className="w-5 h-5 text-gray-700" />
       </button>
-      <h1 className="text-lg font-extrabold text-gray-900 tracking-tight w-full text-center">
-        Tenants Directory
-      </h1>
+      <div className="w-full text-center">
+        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">
+          Tenants Directory
+        </h1>
+        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-0.5">Manage all tenants</p>
+      </div>
     </header>
   );
 }
@@ -82,6 +85,11 @@ function StatusFilter({ activeFilter, onSelectFilter }: { activeFilter: string, 
 function TenantCard({ tenant }: { tenant: any }) {
   const isNotice = tenant.status === 'Notice';
   const isPendingRent = tenant.rentStatus === 'Pending';
+
+  // Since both owner and manager use this screen, we can check the current path
+  // or just use a relative path if they are in the same router context.
+  // Actually, App.tsx has `<Route path="/tenant/:id" element={<TenantProfileScreen />} />` 
+  // for BOTH Owner and Manager. So `/tenant/${tenant.id}` works perfectly for both!
 
   return (
     <Link to={`/tenant/${tenant.id}`} className="bg-white rounded-[1.25rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col gap-3 active:scale-[0.98] transition-transform group hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(37,99,235,0.08)] block">
@@ -194,7 +202,7 @@ export default function TenantListScreen() {
     <>
       <Header onBack={() => navigate(-1)} />
       
-      <main className="flex-1 overflow-y-auto pb-10 hide-scrollbar bg-[#f8f9fa]">
+      <main className="flex-1 overflow-y-auto pb-24 hide-scrollbar bg-[#f8f9fa] relative">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <StatusFilter activeFilter={activeFilter} onSelectFilter={setActiveFilter} />
 
@@ -234,6 +242,14 @@ export default function TenantListScreen() {
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* FAB for Adding Tenant */}
+      <Link 
+        to={window.location.pathname.includes('/manager') ? "/manager/add-tenant" : "/add-tenant"}
+        className="absolute bottom-24 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(37,99,235,0.4)] active:scale-95 transition-transform z-20"
+      >
+        <Plus className="w-6 h-6" />
+      </Link>
     </>
   );
 }

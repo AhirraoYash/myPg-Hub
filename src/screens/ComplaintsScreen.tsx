@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { ArrowLeft, Droplet, Zap, Wifi, Wrench, Clock, X, Image as ImageIcon, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react';
+import { useState, useMemo, useRef } from 'react';
+import { ArrowLeft, Droplet, Zap, Wifi, Wrench, Clock, X, Image as ImageIcon, CheckCircle2, AlertCircle, MessageSquare, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
@@ -85,9 +85,12 @@ function Header({ onBack }: { onBack: () => void }) {
       >
         <ArrowLeft className="w-5 h-5 text-gray-700" />
       </button>
-      <h1 className="text-lg font-extrabold text-gray-900 tracking-tight w-full text-center">
-        Complaints & Issues
-      </h1>
+      <div className="w-full text-center">
+        <h1 className="text-2xl font-black bg-gradient-to-r from-orange-600 to-red-500 bg-clip-text text-transparent tracking-tight">
+          Complaints & Issues
+        </h1>
+        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-0.5">Manage Requests</p>
+      </div>
     </header>
   );
 }
@@ -200,6 +203,27 @@ function ComplaintCard({ complaint, onSelect }: { complaint: any, onSelect: () =
 
 function ComplaintDetailModal({ complaint, onClose }: { complaint: any, onClose: () => void }) {
   const [remark, setRemark] = useState('');
+  const [cost, setCost] = useState('');
+  const [actionType, setActionType] = useState<'progress' | 'resolve' | null>(null);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedPhoto(e.target?.result as string);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
+  const handleSubmitAction = () => {
+    // Implement actual submission logic here
+    console.log(`Action: ${actionType}, Remark: ${remark}, Photo: ${uploadedPhoto ? 'Yes' : 'No'}, Cost: ${cost}`);
+    setActionType(null);
+    onClose();
+  };
 
   let Icon = Wrench;
   let iconBg = 'bg-gray-100';
@@ -300,7 +324,7 @@ function ComplaintDetailModal({ complaint, onClose }: { complaint: any, onClose:
         </div>
 
         {/* Resolution / Remarks Section */}
-        {complaint.status === 'Resolved' ? (
+        {complaint.status === 'Resolved' && (
           <div>
             <h4 className="text-xs font-extrabold text-emerald-600 uppercase tracking-wider mb-2 ml-1 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Resolution Remark
@@ -309,41 +333,139 @@ function ComplaintDetailModal({ complaint, onClose }: { complaint: any, onClose:
               <p className="text-sm text-emerald-800 font-medium">{complaint.remark}</p>
             </div>
           </div>
-        ) : (
-          <div>
-            <h4 className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2 ml-1">Add Remark</h4>
-            <div className="relative">
-              <MessageSquare className="w-4 h-4 text-gray-400 absolute left-4 top-4" />
-              <textarea 
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                placeholder="Type your resolution remark or update here..."
-                className="w-full bg-white border border-gray-200 rounded-[1.25rem] py-3 pl-10 pr-4 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm min-h-[100px] resize-none"
-              ></textarea>
-            </div>
-          </div>
         )}
       </div>
 
       {/* Action Footer */}
-      {complaint.status !== 'Resolved' && (
+      {complaint.status !== 'Resolved' && !actionType && (
         <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-4 pb-8 sm:pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex gap-3 z-10">
           {complaint.status === 'Open' && (
             <button 
-              onClick={onClose}
+              onClick={() => setActionType('progress')}
               className="flex-1 py-4 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95"
             >
               <Clock className="w-4 h-4" /> Mark In Progress
             </button>
           )}
           <button 
-            onClick={onClose}
+            onClick={() => setActionType('resolve')}
             className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-[0_4px_20px_rgb(16,185,129,0.25)] transition-all active:scale-95"
           >
             <CheckCircle2 className="w-4 h-4" /> Mark Resolved
           </button>
         </div>
       )}
+
+      {/* Action Popup (In Progress / Resolve) */}
+      <AnimatePresence>
+        {actionType && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActionType(null)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50"
+            />
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2rem] p-6 pb-8 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.1)]"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-extrabold text-gray-900">
+                  {actionType === 'progress' ? 'Mark as In Progress' : 'Mark as Resolved'}
+                </h3>
+                <button 
+                  onClick={() => setActionType(null)}
+                  className="p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                <div>
+                  <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2 block ml-1">
+                    Upload Photo (Optional)
+                  </label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={fileInputRef}
+                    onChange={handlePhotoUpload}
+                  />
+                  {uploadedPhoto ? (
+                    <div className="relative rounded-xl overflow-hidden h-32 border border-gray-200">
+                      <img src={uploadedPhoto} alt="Uploaded" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => setUploadedPhoto(null)}
+                        className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full text-red-600 hover:bg-white"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    >
+                      <ImageIcon className="w-6 h-6" />
+                      <span className="text-xs font-bold">Tap to upload photo</span>
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2 block ml-1">
+                    {actionType === 'progress' ? 'Initial Remark (Optional)' : 'Final Resolution Remark'}
+                  </label>
+                  <textarea 
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    placeholder={actionType === 'progress' ? "e.g., Plumber called, arriving at 4 PM..." : "e.g., Replaced the broken pipe..."}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[100px] resize-none"
+                  ></textarea>
+                </div>
+
+                {actionType === 'resolve' && (
+                  <div>
+                    <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-2 block ml-1">
+                      Resolution Cost (Optional)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                      <input 
+                        type="number" 
+                        value={cost}
+                        onChange={(e) => setCost(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-8 pr-4 text-sm font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <button 
+                  onClick={handleSubmitAction}
+                  disabled={actionType === 'resolve' && !remark.trim()}
+                  className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                    actionType === 'progress' 
+                      ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-[0_4px_20px_rgb(245,158,11,0.25)]' 
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_4px_20px_rgb(16,185,129,0.25)] disabled:bg-gray-300 disabled:shadow-none'
+                  }`}
+                >
+                  {actionType === 'progress' ? <Clock className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Submit Update
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -356,6 +478,7 @@ export default function ComplaintsScreen() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Open');
   const [selectedComplaint, setSelectedComplaint] = useState<any | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Optimized filtering
   const filteredComplaints = useMemo(() => {
@@ -381,7 +504,7 @@ export default function ComplaintsScreen() {
       <Header onBack={() => navigate(-1)} />
 
       {/* Main Scrollable Area */}
-      <main className="flex-1 overflow-y-auto pb-10 hide-scrollbar bg-[#f8f9fa]">
+      <main className="flex-1 overflow-y-auto pb-24 hide-scrollbar bg-[#f8f9fa] relative">
         <StatusFilter activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <motion.div 
@@ -424,6 +547,14 @@ export default function ComplaintsScreen() {
         </motion.div>
       </main>
 
+      {/* FAB for Adding Complaint */}
+      <button 
+        onClick={() => setIsAddModalOpen(true)}
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(37,99,235,0.4)] active:scale-95 transition-transform z-20"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
       {/* Full Screen Complaint Detail Modal */}
       <AnimatePresence>
         {selectedComplaint && (
@@ -431,6 +562,90 @@ export default function ComplaintsScreen() {
             complaint={selectedComplaint} 
             onClose={() => setSelectedComplaint(null)} 
           />
+        )}
+      </AnimatePresence>
+
+      {/* Add Complaint Modal */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-gray-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center"
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="bg-white w-full sm:w-[400px] rounded-t-[2rem] sm:rounded-[2rem] p-6 shadow-2xl max-h-[90vh] overflow-y-auto hide-scrollbar"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-extrabold text-gray-900">Log Complaint</h2>
+                </div>
+                <button onClick={() => setIsAddModalOpen(false)} className="p-2 bg-gray-50 rounded-full active:scale-95">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-1.5 block ml-1">Title</label>
+                  <input type="text" placeholder="e.g. Broken AC" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-1.5 block ml-1">Category</label>
+                    <select className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none">
+                      <option>Plumbing</option>
+                      <option>Electricity</option>
+                      <option>WiFi</option>
+                      <option>Maintenance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-1.5 block ml-1">Urgency</label>
+                    <select className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none">
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-1.5 block ml-1">Room / Tenant</label>
+                  <select className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 appearance-none">
+                    <option>Room 101 - Rahul</option>
+                    <option>Room 102 - Amit</option>
+                    <option>Room 201 - Vikram</option>
+                    <option>Common Area</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-extrabold text-gray-900 uppercase tracking-wider mb-1.5 block ml-1">Description</label>
+                  <textarea 
+                    placeholder="Describe the issue in detail..."
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-h-[100px] resize-none"
+                  ></textarea>
+                </div>
+                
+                <button 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-[0_4px_20px_rgb(37,99,235,0.25)] transition-all active:scale-95"
+                >
+                  Submit Complaint
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

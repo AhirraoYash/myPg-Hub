@@ -27,9 +27,12 @@ function Header() {
         <Download className="w-5 h-5 text-gray-700" />
       </button>
       
-      <h1 className="text-lg font-extrabold text-gray-900 tracking-tight text-center">
-        Payments & Billing
-      </h1>
+      <div>
+        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight text-center">
+          Payments & Billing
+        </h1>
+        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-0.5 text-center">Track Revenue</p>
+      </div>
       
       <button className="relative active:scale-95 transition-transform p-2 bg-white rounded-full shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex items-center justify-center w-10 h-10">
         <Filter className="w-5 h-5 text-gray-700" />

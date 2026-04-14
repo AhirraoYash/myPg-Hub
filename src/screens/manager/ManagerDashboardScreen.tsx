@@ -4,22 +4,18 @@ import {
   BedDouble, 
   UserPlus, 
   AlertCircle, 
-  ShieldCheck, 
-  FileText, 
   ChevronRight, 
   Bell,
   Users,
   LogOut,
-  Wallet,
-  Megaphone,
-  AlertTriangle,
   Clock,
+  Receipt,
   X,
   Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { Logo } from '../components/Logo';
+import { Logo } from '../../components/Logo';
 
 // ----------------------------------------------------------------------
 // Mock Data
@@ -34,17 +30,6 @@ const recentActivities = [
 // ----------------------------------------------------------------------
 // Sub-components
 // ----------------------------------------------------------------------
-
-function ActionItem({ icon: Icon, label }: { icon: any, label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2 group cursor-pointer">
-      <div className="w-14 h-14 bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex items-center justify-center group-active:scale-95 transition-all group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:border-blue-100">
-        <Icon className="w-6 h-6 text-blue-600" />
-      </div>
-      <span className="text-[10px] font-bold text-gray-600 text-center leading-tight">{label}</span>
-    </div>
-  );
-}
 
 function StatCard({ title, value, subtitle, icon: Icon, theme, to }: any) {
   const themes = {
@@ -75,9 +60,11 @@ function StatCard({ title, value, subtitle, icon: Icon, theme, to }: any) {
 // Main Screen Component
 // ----------------------------------------------------------------------
 
-export default function HomeScreen() {
-  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
-  const [broadcastMessage, setBroadcastMessage] = useState('');
+export default function ManagerDashboardScreen() {
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [expenseAmount, setExpenseAmount] = useState('');
+  const [expenseReason, setExpenseReason] = useState('Water Tanker');
+  const [expenseDesc, setExpenseDesc] = useState('');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -92,28 +79,23 @@ export default function HomeScreen() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
 
-  const handleSendBroadcast = () => {
-    // Implement broadcast logic here
-    console.log('Sending broadcast:', broadcastMessage);
-    setIsBroadcastModalOpen(false);
-    setBroadcastMessage('');
-  };
-
   return (
     <div className="flex flex-col h-full bg-[#f8f9fa]">
       
       {/* Header */}
       <header className="px-6 pt-14 pb-4 flex justify-between items-center bg-[#f8f9fa] z-10 sticky top-0">
         <div>
-          <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-0.5">Good Morning,</p>
-          <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Kartik Modi</h1>
+          <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-0.5">Manager Portal</p>
+          <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">Ravi Patel</h1>
         </div>
         <div className="flex items-center gap-3">
-          <Logo className="w-8 h-8" primaryColor="#3b82f6" secondaryColor="#2563eb" />
           <button className="relative p-2.5 bg-white rounded-full shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 active:scale-95 transition-transform">
             <Bell className="w-5 h-5 text-gray-700" />
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
+          <Link to="/manager/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm active:scale-95 transition-transform">
+            <img src="https://picsum.photos/seed/manager/100/100" alt="Profile" className="w-full h-full object-cover" />
+          </Link>
         </div>
       </header>
 
@@ -126,82 +108,40 @@ export default function HomeScreen() {
           className="flex flex-col gap-6 pt-2"
         >
           
-          {/* SaaS Dashboard Metrics (2x2 Grid) */}
+          {/* Manager Metrics */}
           <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 px-6">
-            <StatCard title="Total Tenants" value="42" subtitle="Active in property" icon={Users} theme="blue" to="/tenants?filter=All" />
+            <StatCard title="Total Tenants" value="42" subtitle="Active in property" icon={Users} theme="blue" to="/manager/tenants" />
             <StatCard title="Occupancy" value="84%" subtitle="42/50 Beds filled" icon={BedDouble} theme="emerald" />
-            <StatCard title="Pending Rent" value="₹45k" subtitle="From 8 tenants" icon={IndianRupee} theme="red" to="/tenants?filter=Pending+Rent" />
-            <StatCard title="Notice Period" value="3" subtitle="Leaving in 30 days" icon={LogOut} theme="amber" to="/tenants?filter=Notice" />
+            <StatCard title="Total Earnings" value="₹45k" subtitle="Salary + Incentives" icon={IndianRupee} theme="amber" />
+            <StatCard title="Pending Issues" value="4" subtitle="Requires attention" icon={AlertCircle} theme="red" to="/manager/complaints" />
           </motion.div>
 
-          {/* Smart Alerts (Proactive SaaS Feature) */}
+          {/* Quick Actions */}
           <motion.div variants={itemVariants} className="px-6">
-            <h3 className="text-sm font-bold text-gray-900 mb-3 tracking-wide">Smart Alerts</h3>
-            <div className="flex flex-col gap-3">
-              <Link to="/verify-kyc" className="bg-amber-50/50 border border-amber-100 rounded-[1.25rem] p-4 flex items-center gap-4 active:scale-[0.98] transition-transform">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-extrabold text-amber-900">2 Pending KYCs</h4>
-                  <p className="text-xs font-medium text-amber-700/80 mt-0.5">Requires your approval</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-bold text-gray-900 mb-3 tracking-wide">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <Link to="/manager/add-tenant" className="bg-blue-600 text-white rounded-[1.25rem] p-4 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform shadow-[0_4px_20px_rgb(37,99,235,0.25)]">
+                <UserPlus className="w-6 h-6" />
+                <span className="text-xs font-bold">Add Tenant</span>
               </Link>
-              
-              <Link to="/agreements" className="bg-red-50/50 border border-red-100 rounded-[1.25rem] p-4 flex items-center gap-4 active:scale-[0.98] transition-transform">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-extrabold text-red-900">3 Agreements Expiring</h4>
-                  <p className="text-xs font-medium text-red-700/80 mt-0.5">Expiring in next 15 days</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-red-400" />
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Quick Actions (Grid) */}
-          <motion.div variants={itemVariants} className="px-6">
-            <h3 className="text-sm font-bold text-gray-900 mb-4 tracking-wide">Quick Actions</h3>
-            <div className="grid grid-cols-3 gap-3">
-              <Link to="/add-tenant" className="block">
-                <ActionItem icon={UserPlus} label="Add Tenant" />
-              </Link>
-              <Link to="/record-payment" className="block">
-                <ActionItem icon={Wallet} label="Record Pay" />
-              </Link>
-              <Link to="/verify-kyc" className="block">
-                <ActionItem icon={ShieldCheck} label="Verify KYC" />
-              </Link>
-              <Link to="/complaints" className="block">
-                <ActionItem icon={AlertCircle} label="Complaints" />
-              </Link>
-              <Link to="/agreements" className="block">
-                <ActionItem icon={FileText} label="Agreements" />
-              </Link>
-              <button className="block w-full" onClick={() => setIsBroadcastModalOpen(true)}>
-                <ActionItem icon={Megaphone} label="Broadcast" />
+              <button onClick={() => setIsExpenseModalOpen(true)} className="bg-amber-50 text-amber-600 border border-amber-100 rounded-[1.25rem] p-4 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform shadow-[0_4px_20px_rgb(0,0,0,0.04)]">
+                <Receipt className="w-6 h-6" />
+                <span className="text-xs font-bold">Request Funds</span>
               </button>
             </div>
           </motion.div>
 
           {/* Recent Activity */}
-          <motion.div variants={itemVariants} className="px-6 pb-4">
-            <div className="flex justify-between items-center mb-4">
+          <motion.div variants={itemVariants} className="px-6">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-gray-900 tracking-wide">Recent Activity</h3>
-              <Link to="/activity" className="text-xs font-bold text-blue-600 active:opacity-70 flex items-center hover:underline">
-                View All <ChevronRight className="w-3 h-3 ml-0.5" />
-              </Link>
+              <button className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">View All</button>
             </div>
-            
             <div className="bg-white rounded-[1.25rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
               {recentActivities.map((activity, index) => {
                 const Icon = activity.icon;
                 return (
-                  <Link 
-                    to="/tenant/1"
+                  <div 
                     key={activity.id} 
                     className={`flex items-center gap-4 p-4 active:bg-gray-50 transition-colors block ${
                       index !== recentActivities.length - 1 ? 'border-b border-gray-50' : ''
@@ -218,9 +158,8 @@ export default function HomeScreen() {
                       <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {activity.time}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-300" />
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
@@ -229,9 +168,9 @@ export default function HomeScreen() {
         </motion.div>
       </main>
 
-      {/* Broadcast Modal */}
+      {/* Request Funds Modal */}
       <AnimatePresence>
-        {isBroadcastModalOpen && (
+        {isExpenseModalOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -247,37 +186,70 @@ export default function HomeScreen() {
             >
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                    <Megaphone className="w-5 h-5" />
+                  <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-600">
+                    <Receipt className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-extrabold text-gray-900">Broadcast Message</h2>
-                    <p className="text-xs font-medium text-gray-500 mt-0.5">Send a message to all tenants</p>
+                    <h2 className="text-lg font-extrabold text-gray-900">Request Funds</h2>
+                    <p className="text-xs font-medium text-gray-500 mt-0.5">Send expense request to owner</p>
                   </div>
                 </div>
-                <button onClick={() => setIsBroadcastModalOpen(false)} className="p-2 bg-gray-50 rounded-full active:scale-95">
+                <button onClick={() => setIsExpenseModalOpen(false)} className="p-2 bg-gray-50 rounded-full active:scale-95">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
 
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Message</label>
+                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Amount Needed</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₹</span>
+                    <input 
+                      type="number" 
+                      value={expenseAmount}
+                      onChange={(e) => setExpenseAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-8 pr-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Category</label>
+                  <select 
+                    value={expenseReason}
+                    onChange={(e) => setExpenseReason(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 appearance-none"
+                  >
+                    <option value="Water Tanker">Water Tanker</option>
+                    <option value="Cleaning Supplies">Cleaning Supplies (Soap, etc.)</option>
+                    <option value="Maintenance/Repairs">Maintenance / Repairs</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-1.5 block ml-1">Description (Optional)</label>
                   <textarea 
-                    value={broadcastMessage}
-                    onChange={(e) => setBroadcastMessage(e.target.value)}
-                    placeholder="Type your message here..."
-                    rows={4}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" 
+                    value={expenseDesc}
+                    onChange={(e) => setExpenseDesc(e.target.value)}
+                    placeholder="E.g., Need 2 water tankers for today..."
+                    rows={3}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none" 
                   />
                 </div>
                 
                 <button 
-                  onClick={handleSendBroadcast}
-                  disabled={!broadcastMessage.trim()}
-                  className="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-[0_4px_20px_rgb(37,99,235,0.25)] transition-all active:scale-95 flex items-center justify-center gap-2"
+                  onClick={() => {
+                    console.log('Requesting funds:', { amount: expenseAmount, reason: expenseReason, desc: expenseDesc });
+                    setIsExpenseModalOpen(false);
+                    setExpenseAmount('');
+                    setExpenseDesc('');
+                  }}
+                  disabled={!expenseAmount}
+                  className="w-full py-4 mt-2 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-[0_4px_20px_rgb(245,158,11,0.25)] transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <Send className="w-4 h-4" /> Send Broadcast
+                  <Send className="w-4 h-4" /> Send Request to Owner
                 </button>
               </div>
             </motion.div>

@@ -53,9 +53,12 @@ function Header({ onBack }: { onBack: () => void }) {
       >
         <ArrowLeft className="w-5 h-5 text-gray-700" />
       </button>
-      <h1 className="text-lg font-extrabold text-gray-900 tracking-tight w-full text-center">
-        Record Payment
-      </h1>
+      <div className="w-full text-center">
+        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">
+          Record Payment
+        </h1>
+        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mt-0.5">Log Transaction</p>
+      </div>
     </header>
   );
 }
