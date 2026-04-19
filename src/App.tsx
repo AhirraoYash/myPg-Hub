@@ -34,7 +34,7 @@ import TenantRaiseComplaintScreen from './screens/tenant/TenantRaiseComplaintScr
 import TenantRoomScreen from './screens/tenant/TenantRoomScreen';
 import TenantDocumentsScreen from './screens/tenant/TenantDocumentsScreen';
 import TenantMoveOutScreen from './screens/tenant/TenantMoveOutScreen';
-import TenantProfileScreen from './screens/tenant/TenantProfileScreen';
+import TenantSelfProfileScreen from './screens/tenant/TenantProfileScreen';
 import TenantGatePassScreen from './screens/tenant/TenantGatePassScreen';
 
 import ManagerDashboardScreen from './screens/manager/ManagerDashboardScreen';
@@ -158,7 +158,7 @@ export default function App() {
               <Route path="/tenant/room" element={<TenantRoomScreen />} />
               <Route path="/tenant/documents" element={<TenantDocumentsScreen />} />
               <Route path="/tenant/move-out" element={<TenantMoveOutScreen />} />
-              <Route path="/tenant/profile" element={<TenantProfileScreen />} />
+              <Route path="/tenant/profile" element={<TenantSelfProfileScreen />} />
               <Route path="/tenant/gate-pass" element={<TenantGatePassScreen />} />
               <Route path="*" element={<TenantDashboardScreen onLogout={() => setIsAuthenticated(false)} />} />
             </Routes>

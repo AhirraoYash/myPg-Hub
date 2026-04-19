@@ -1,0 +1,956 @@
+{
+	"info": {
+		"_postman_id": "owner-mypghub-2026",
+		"name": "MyPg Hub — Owner",
+		"description": "Complete Postman collection for the **Owner** role of MyPg Hub.\n\n## Auth Flow\n1. Call **Login** with the Owner's phone & PIN.\n2. Copy the `token` from the response.\n3. The token is auto-set in the collection variable `{{token}}`.\n\n## Variable Setup\n- `baseUrl` → `http://localhost:5000`\n- `token`   → Set automatically after login\n\nAll protected routes use `Bearer {{token}}` in the Authorization header.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "property_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tenant_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "room_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bed_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoice_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notice_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "complaint_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "manager_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "🔐 Auth",
+			"item": [
+				{
+					"name": "Register Owner & Property",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.token) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('property_id', res.data.property.id);",
+									"    console.log('✅ Token & property_id saved from register');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"9876543210\",\n    \"pin\": \"1234\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"pg_name\": \"My PG Hub Premium\",\n    \"address\": \"Main Street, Bangalore\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Quickly register a new owner logic & property. Auto-saves token & property_id."
+					}
+				},
+				{
+					"name": "Login (Owner)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.token) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('property_id', res.data.user.property_id);",
+									"    console.log('✅ Token & property_id saved');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"9999999999\",\n    \"pin\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with Owner phone & PIN. Auto-saves token & property_id to collection variables."
+					}
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "Returns the authenticated user's profile."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏠 Property Management",
+			"item": [
+				{
+					"name": "Create Property",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('property_id', res.data._id);",
+									"    console.log('✅ property_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sunrise PG - Koramangala\",\n    \"address\": \"123, 4th Block, Koramangala, Bangalore 560034\",\n    \"upi_id\": \"sunrise@okaxis\",\n    \"settings\": {\n        \"default_rent_due_date\": 5,\n        \"late_fee_amount\": 500,\n        \"notice_period_days\": 30,\n        \"deposit_amount\": 15000\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/properties",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "properties"]
+						},
+						"description": "Creates a new property and assigns the caller as Owner. Auto-saves `property_id`."
+					}
+				},
+				{
+					"name": "Get Property Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/properties/settings",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "properties", "settings"]
+						},
+						"description": "Fetches the current property details including settings."
+					}
+				},
+				{
+					"name": "Update Property Settings",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sunrise PG - Updated\",\n    \"upi_id\": \"sunrise_new@okaxis\",\n    \"settings\": {\n        \"late_fee_amount\": 750,\n        \"deposit_amount\": 20000\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/properties/settings",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "properties", "settings"]
+						},
+						"description": "Owner-only: Partially update property name, address, upi_id, and nested settings."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏢 Rooms & Beds",
+			"item": [
+				{
+					"name": "Create Room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('room_id', res.data._id);",
+									"    console.log('✅ room_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"room_number\": \"101\",\n    \"floor\": \"1st Floor\",\n    \"room_type\": \"AC\",\n    \"capacity\": 3,\n    \"amenities\": [\"WiFi\", \"Wardrobe\", \"Attached Bathroom\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/rooms",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rooms"]
+						},
+						"description": "Create a room in the property. Auto-saves `room_id`."
+					}
+				},
+				{
+					"name": "Create Bed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('bed_id', res.data._id);",
+									"    console.log('✅ bed_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"room_id\": \"{{room_id}}\",\n    \"bed_identifier\": \"A\",\n    \"price\": 8000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/beds",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "beds"]
+						},
+						"description": "Create a bed in a room. Uses `room_id` variable. Auto-saves `bed_id`."
+					}
+				},
+				{
+					"name": "Get All Rooms with Beds",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/rooms",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rooms"]
+						},
+						"description": "Returns all rooms with their nested beds."
+					}
+				},
+				{
+					"name": "Get Vacant Beds Only",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/rooms?status=Vacant",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rooms"],
+							"query": [
+								{
+									"key": "status",
+									"value": "Vacant"
+								}
+							]
+						},
+						"description": "Returns rooms that have at least one Vacant bed."
+					}
+				}
+			]
+		},
+		{
+			"name": "👥 Staff (Managers)",
+			"item": [
+				{
+					"name": "Add Manager",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.user_id) {",
+									"    pm.collectionVariables.set('manager_id', res.data.user_id);",
+									"    console.log('✅ manager_id saved:', res.data.user_id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"8888888888\",\n    \"first_name\": \"Rahul\",\n    \"last_name\": \"Sharma\",\n    \"email\": \"rahul.mgr@example.com\",\n    \"pin\": \"5678\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/staff",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "staff"]
+						},
+						"description": "Owner-only: Add a manager to the property. Auto-saves `manager_id`."
+					}
+				},
+				{
+					"name": "List All Managers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/staff",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "staff"]
+						},
+						"description": "Owner-only: Returns list of all active managers."
+					}
+				},
+				{
+					"name": "Remove Manager",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/staff/{{manager_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "staff", "{{manager_id}}"]
+						},
+						"description": "Owner-only: Deactivates a manager's access."
+					}
+				}
+			]
+		},
+		{
+			"name": "🧑‍🤝‍🧑 Tenants",
+			"item": [
+				{
+					"name": "Onboard Tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.user_id) {",
+									"    pm.collectionVariables.set('tenant_id', res.data.user_id);",
+									"    console.log('✅ tenant_id saved:', res.data.user_id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"7777777777\",\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Patel\",\n    \"bed_id\": \"{{bed_id}}\",\n    \"email\": \"amit.tenant@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tenants/onboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tenants", "onboard"]
+						},
+						"description": "Onboard a new tenant — creates user, assigns role, occupies bed. PIN defaults to last 4 digits of phone. Auto-saves `tenant_id`."
+					}
+				},
+				{
+					"name": "List All Tenants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tenants?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tenants"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Paginated list of all active tenants with bed assignments."
+					}
+				},
+				{
+					"name": "Get Tenant by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tenants/{{tenant_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tenants", "{{tenant_id}}"]
+						},
+						"description": "Fetch a single tenant's details including bed & room info."
+					}
+				}
+			]
+		},
+		{
+			"name": "💰 Finance",
+			"item": [
+				{
+					"name": "Generate Invoice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('invoice_id', res.data._id);",
+									"    console.log('✅ invoice_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tenant_id\": \"{{tenant_id}}\",\n    \"billing_month\": \"May-2026\",\n    \"due_date\": \"2026-05-05\",\n    \"idempotency_key\": \"inv-{{tenant_id}}-May-2026\",\n    \"line_items\": [\n        {\n            \"description\": \"Monthly Rent\",\n            \"amount\": 8000,\n            \"type\": \"Rent\"\n        },\n        {\n            \"description\": \"Electricity Charges\",\n            \"amount\": 500,\n            \"type\": \"Other\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/invoices",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "invoices"]
+						},
+						"description": "Generate an invoice for a tenant with line items. Auto-saves `invoice_id`."
+					}
+				},
+				{
+					"name": "List All Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/invoices?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "invoices"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "All invoices for the property (Owner sees all)."
+					}
+				},
+				{
+					"name": "List Unpaid Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/invoices?status=Unpaid",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "invoices"],
+							"query": [
+								{
+									"key": "status",
+									"value": "Unpaid"
+								}
+							]
+						},
+						"description": "Filter invoices by status: Unpaid | Partial | Payment_Under_Review | Paid"
+					}
+				},
+				{
+					"name": "Record Payment (Cash)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('payment_id', res.data._id);",
+									"    console.log('✅ payment_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoice_id\": \"{{invoice_id}}\",\n    \"tenant_id\": \"{{tenant_id}}\",\n    \"amount\": 8500,\n    \"payment_method\": \"Cash\",\n    \"notes\": \"Collected at reception\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"]
+						},
+						"description": "Record a cash payment. Cash goes to `Pending_Verification` status, needing Owner approval. Auto-saves `payment_id`."
+					}
+				},
+				{
+					"name": "Record Payment (UPI)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoice_id\": \"{{invoice_id}}\",\n    \"tenant_id\": \"{{tenant_id}}\",\n    \"amount\": 8500,\n    \"payment_method\": \"UPI\",\n    \"transaction_id\": \"UPI123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"]
+						},
+						"description": "Record an online UPI payment. Status is immediately `Completed`."
+					}
+				},
+				{
+					"name": "List All Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "All payments for the property. Owners/Managers can filter by tenant_id."
+					}
+				},
+				{
+					"name": "List Payments by Tenant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments?tenant_id={{tenant_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"],
+							"query": [
+								{
+									"key": "tenant_id",
+									"value": "{{tenant_id}}"
+								}
+							]
+						},
+						"description": "Filter payments by a specific tenant."
+					}
+				},
+				{
+					"name": "Verify Cash Payment ✅",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_id\": \"{{payment_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/verify-payment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "verify-payment"]
+						},
+						"description": "Owner-only: Verify/approve a cash payment collected by a manager. Updates both payment and invoice."
+					}
+				}
+			]
+		},
+		{
+			"name": "📊 Dashboard",
+			"item": [
+				{
+					"name": "Get Owner Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "dashboard"]
+						},
+						"description": "Owner-only: Returns total tenants, occupancy stats, financials, and open complaints."
+					}
+				},
+				{
+					"name": "Get Owner Dashboard (Monthly)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dashboard?month=2026-05",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "dashboard"],
+							"query": [
+								{
+									"key": "month",
+									"value": "2026-05"
+								}
+							]
+						},
+						"description": "Filter dashboard metrics by month (format: YYYY-MM)."
+					}
+				}
+			]
+		},
+		{
+			"name": "🚪 Move-Out",
+			"item": [
+				{
+					"name": "List Move-Out Notices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/moveout/notices?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "moveout", "notices"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "List all move-out notices. Optionally filter by status."
+					}
+				},
+				{
+					"name": "List Notices by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/moveout/notices?status=Notice_Given",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "moveout", "notices"],
+							"query": [
+								{
+									"key": "status",
+									"value": "Notice_Given"
+								}
+							]
+						},
+						"description": "Filter: Notice_Given | Inspection_Pending | Settlement_Generated | Completed"
+					}
+				},
+				{
+					"name": "Generate Settlement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notice_id\": \"{{notice_id}}\",\n    \"deductions\": [\n        {\n            \"reason\": \"Wall damage in room\",\n            \"amount\": 2000\n        },\n        {\n            \"reason\": \"Missing key\",\n            \"amount\": 500\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/moveout/settle",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "moveout", "settle"]
+						},
+						"description": "Generate a settlement statement: calculates refund = deposit − unpaid_rent − deductions."
+					}
+				},
+				{
+					"name": "Complete Move-Out ✅",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notice_id\": \"{{notice_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/moveout/complete",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "moveout", "complete"]
+						},
+						"description": "Owner-only: Finalise move-out — vacates bed, deactivates tenant role, marks notice Completed."
+					}
+				}
+			]
+		},
+		{
+			"name": "🛠️ Complaints",
+			"item": [
+				{
+					"name": "List All Complaints",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/complaints",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "complaints"]
+						},
+						"description": "Owner sees all complaints in the property."
+					}
+				},
+				{
+					"name": "Update Complaint Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Resolved\",\n    \"resolution_cost\": 1500\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/complaints/{{complaint_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "complaints", "{{complaint_id}}"]
+						},
+						"description": "Update status to: Open | In_Progress | Resolved. Optionally log resolution_cost."
+					}
+				}
+			]
+		},
+		{
+			"name": "👤 My Account",
+			"item": [
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Yash\",\n    \"last_name\": \"Patil\",\n    \"email\": \"yash.owner@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile"]
+						},
+						"description": "Update the current user's name or email."
+					}
+				},
+				{
+					"name": "Change PIN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_pin\": \"1234\",\n    \"new_pin\": \"5678\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/change-pin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "change-pin"]
+						},
+						"description": "Change the current user's login PIN (4–6 digits)."
+					}
+				}
+			]
+		},
+		{
+			"name": "❤️ Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Check if the server is running."
+					}
+				}
+			]
+		}
+	]
+}

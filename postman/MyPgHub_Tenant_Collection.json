@@ -1,0 +1,421 @@
+{
+	"info": {
+		"_postman_id": "tenant-mypghub-2026",
+		"name": "MyPg Hub — Tenant",
+		"description": "Complete Postman collection for the **Tenant** role of MyPg Hub.\n\n## Auth Flow\n1. Call **Login** with the Tenant's phone & PIN.\n2. The `token` is auto-saved to collection variables.\n\n## Default PIN\nThe default PIN for a newly onboarded tenant is the **last 4 digits of their phone number** (e.g., phone `7777777777` → PIN `7777`).\n\n## Variable Setup\n- `baseUrl` → `http://localhost:5000`\n- `token`   → Set automatically after login\n\nAll protected routes use `Bearer {{token}}` in the Authorization header.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "property_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "complaint_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoice_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "payment_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "🔐 Auth",
+			"item": [
+				{
+					"name": "Login (Tenant)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data.token) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('property_id', res.data.user.property_id);",
+									"    console.log('✅ Token & property_id saved');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"7777777777\",\n    \"pin\": \"7777\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with Tenant phone & PIN. Default PIN = last 4 digits of phone. Auto-saves token."
+					}
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "Returns the tenant's profile with role and property info."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏠 Property (Read-Only)",
+			"item": [
+				{
+					"name": "Get Property Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/properties/settings",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "properties", "settings"]
+						},
+						"description": "View the PG property details (name, address, rent due date, etc.)."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏢 Rooms (Read-Only)",
+			"item": [
+				{
+					"name": "Get All Rooms with Beds",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/rooms",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rooms"]
+						},
+						"description": "View all rooms and beds in the property."
+					}
+				}
+			]
+		},
+		{
+			"name": "💰 My Invoices & Payments",
+			"item": [
+				{
+					"name": "View My Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/invoices?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "invoices"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Shows only the tenant's own invoices (auto-filtered by JWT)."
+					}
+				},
+				{
+					"name": "View Unpaid Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/invoices?status=Unpaid",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "invoices"],
+							"query": [
+								{
+									"key": "status",
+									"value": "Unpaid"
+								}
+							]
+						},
+						"description": "Filter own invoices by status: Unpaid | Partial | Paid"
+					}
+				},
+				{
+					"name": "Make Payment (UPI)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('payment_id', res.data._id);",
+									"    console.log('✅ payment_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoice_id\": \"{{invoice_id}}\",\n    \"tenant_id\": \"REPLACE_WITH_YOUR_USER_ID\",\n    \"amount\": 8500,\n    \"payment_method\": \"UPI\",\n    \"transaction_id\": \"UPI_TXN_123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"]
+						},
+						"description": "Record a UPI payment against an invoice. Replace `tenant_id` with your own user ID from the Me endpoint."
+					}
+				},
+				{
+					"name": "View My Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/payments?page=1&limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "finance", "payments"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Shows only the tenant's own payment history (auto-filtered by JWT)."
+					}
+				}
+			]
+		},
+		{
+			"name": "🚪 Move-Out",
+			"item": [
+				{
+					"name": "Submit Move-Out Notice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('notice_id', res.data._id);",
+									"    console.log('✅ notice_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/moveout/notice",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "moveout", "notice"]
+						},
+						"description": "Tenant-only: Submit a move-out notice. No body required — uses tenant info from JWT. The expected move-out date is auto-calculated based on the property's notice period."
+					}
+				}
+			]
+		},
+		{
+			"name": "🛠️ My Complaints",
+			"item": [
+				{
+					"name": "Create Complaint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('complaint_id', res.data._id);",
+									"    console.log('✅ complaint_id saved:', res.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Leaking tap in bathroom\",\n    \"description\": \"The bathroom tap has been leaking for 2 days causing water waste and floor slipperiness.\",\n    \"category\": \"Plumbing\",\n    \"urgency\": \"High\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/complaints",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "complaints"]
+						},
+						"description": "Tenant-only: Create a new complaint.\n\n**Categories:** Plumbing | Electrical | Cleaning | WiFi | Other\n**Urgency:** Low | Medium | High\n\nAuto-saves `complaint_id`."
+					}
+				},
+				{
+					"name": "View My Complaints",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/complaints",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "complaints"]
+						},
+						"description": "Shows only the tenant's own complaints (auto-filtered by JWT)."
+					}
+				}
+			]
+		},
+		{
+			"name": "👤 My Account",
+			"item": [
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Patel\",\n    \"email\": \"amit.patel@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile"]
+						},
+						"description": "Update your name or email."
+					}
+				},
+				{
+					"name": "Change PIN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_pin\": \"7777\",\n    \"new_pin\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/change-pin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "change-pin"]
+						},
+						"description": "Change your login PIN (4–6 digits)."
+					}
+				}
+			]
+		},
+		{
+			"name": "❤️ Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Check if the server is running."
+					}
+				}
+			]
+		}
+	]
+}
